@@ -1,0 +1,9 @@
+# Privata nycklar och autentiseringsuppgifter
+*.pem
+*.key
+.env
+id_rsa
+
+# Operativsystem
+.DS_Store
+Thumbs.db
