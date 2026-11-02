@@ -28,7 +28,7 @@ NACL utgående: 100 TCP/80 0.0.0.0/0; 110 TCP/443 0.0.0.0/0; 120 TCP/1024-65535 
 
 ## Verifiering
 
-Kommandon finns i `kommandon.txt`. Fyll bara i verkliga resultat när testen genomförts:
+Kommandon finns i `kommandon.txt`.
 
 - Ny instans finns i `novatrix-vpc` / `novatrix-public`, med ny publik IP.
 - HTTP: webbsidan ska svara på port 80.
