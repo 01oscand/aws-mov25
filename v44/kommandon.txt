@@ -1,0 +1,34 @@
+# Vecka 44 - kommandon (PowerShell på din dator, om inget annat anges)
+# Kontrollera aktuell publik IP (från din egen dator):
+curl.exe https://checkip.amazonaws.com
+
+# Verifiering av ny server (ersätt <NY_PUBLIK_IP>):
+curl.exe -I http://<NY_PUBLIK_IP>
+Test-NetConnection <NY_PUBLIK_IP> -Port 80
+Test-NetConnection <NY_PUBLIK_IP> -Port 443
+Test-NetConnection <NY_PUBLIK_IP> -Port 3306
+ssh -i "$HOME\.ssh\novatrix-web-key.pem" ec2-user@<NY_PUBLIK_IP>
+
+# Efter SSH-inloggning, på EC2:
+whoami
+sudo systemctl status httpd --no-pager
+aws sts get-caller-identity
+aws s3 ls s3://novatrix-data-01oscand-v43/
+
+# Rekommenderat för verkligt HTTPS på 443 (på EC2):
+sudo dnf install -y openssl mod_ssl
+sudo openssl req -x509 -nodes -days 30 -newkey rsa:2048 -keyout /etc/pki/tls/private/apache-selfsigned.key -out /etc/pki/tls/certs/apache-selfsigned.crt -subj '/CN=novatrix-web'
+sudo chmod 600 /etc/pki/tls/private/apache-selfsigned.key
+sudo apachectl configtest
+sudo systemctl restart httpd
+sudo ss -ltn | grep ':443'
+curl -kI https://localhost
+
+# Om ssl.conf pekar på andra filnamn behöver dess SSLCertificateFile och
+# SSLCertificateKeyFile först ställas in till sökvägarna ovan.
+# På Windows efteråt: curl.exe -kI https://<NY_PUBLIK_IP>
+
+# Git:
+git add README.md v44
+git commit -m "v44: nätverk och säkerhet"
+git push
