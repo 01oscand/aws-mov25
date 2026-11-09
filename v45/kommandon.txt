@@ -1,0 +1,33 @@
+# Vecka 45 – kopierbara kommandon. KÖR PÅ EC2 om inte annat anges.
+# Exakta resursnamn följer AWS-guiden. RDS endpoint, EFS-id och aktuell publik IP hämtas i AWS.
+
+# EFS-mount (byt FS_ID från EFS > File systems)
+sudo dnf install -y amazon-efs-utils
+sudo mkdir -p /var/www/html/wp-content
+FS_ID="fs-ERSATT_MED_RIKTIGT_ID"
+sudo mount -t efs -o tls "${FS_ID}:/" /var/www/html/wp-content
+findmnt /var/www/html/wp-content
+# Lägg till i /etc/fstab EN GÅNG, först efter lyckad manuell montering:
+# fs-...:/ /var/www/html/wp-content efs _netdev,noresvport,tls,nofail 0 0
+
+# WordPress: kopiera installera-wordpress.sh till EC2 och kör på EC2
+bash installera-wordpress.sh
+
+# DB + WordPress verifiering (mata lösenordet först när programmet frågar)
+RDS_ENDPOINT="DIN-FULLSTÄNDIGA-RDS-ENDPOINT"
+mariadb -h "$RDS_ENDPOINT" -u admin -p -D wordpress -e 'SHOW TABLES;'
+mariadb -h "$RDS_ENDPOINT" -u admin -p -D wordpress -e 'SELECT ID, post_title, post_status FROM wp_posts LIMIT 10;'
+findmnt /var/www/html/wp-content
+df -h | grep -E 'wp-content|Filesystem'
+sudo find /var/www/html/wp-content/uploads -type f | head -n 10
+
+# S3-backup (med skriptet på servern)
+bash backup.sh "$RDS_ENDPOINT"
+aws s3 ls s3://novatrix-backup-01oscand-01/backup/ --region eu-north-1
+
+# Tillstånd och felsökning
+aws sts get-caller-identity
+sudo systemctl status httpd --no-pager
+sudo systemctl status php-fpm --no-pager
+sudo apachectl configtest
+getent hosts "$RDS_ENDPOINT"

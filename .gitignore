@@ -3,7 +3,10 @@
 *.key
 .env
 id_rsa
-
+wp-config.php
+**/wp-config.php
+*.sql
+.env
 # Operativsystem
 .DS_Store
 Thumbs.db
