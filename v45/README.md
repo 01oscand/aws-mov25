@@ -31,5 +31,5 @@ MariaDB och EFS saknar publik exponering. De tar endast emot trafik från webbse
 
 Se [`kommandon.txt`](kommandon.txt), [`installera-wordpress.sh`](installera-wordpress.sh), [`backup.sh`](backup.sh) och [`s3-backup-policy.json`](s3-backup-policy.json).
 
-**Efter utförd labb:** Dokumentera de verkliga resultaten för `aws sts get-caller-identity`, `df -h`, ett SQL-SELECT från WordPress-tabellerna och `aws s3 ls s3://novatrix-backup-01oscand-01/backup/`. Ange även aktuell RDS-endpoint i redovisningen i maskerad form och den aktuella webbadressen. Publicera aldrig lösenord, privata SSH-nycklar eller `wp-config.php`.
+
 
