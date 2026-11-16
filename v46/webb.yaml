@@ -35,7 +35,7 @@ Resources:
         - Key: Name
           Value: novatrix-v46-web
         - Key: LabStage
-          Value: forsta
+          Value: uppdaterad
         - Key: Course
           Value: MOV25-v46
       UserData:
