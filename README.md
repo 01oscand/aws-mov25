@@ -22,3 +22,7 @@ Skapa ett eget VPC för Novatrix AB med ett publikt och två privata subnät, ko
 - [Vecka 45 – Storage och databas](v45/README.md)
 
 Sätt upp en säker WordPress-miljö för Novatrix AB med Amazon RDS (MariaDB) för databasen, Amazon EFS för delad fillagring och Amazon S3 för säkerhetskopiering. Konfigurera privata subnät, Security Groups och IAM-behörigheter samt automatisk backup och en livscykelregel på 14 dagar. Verifiera att WordPress fungerar och att databasen och lagringen är korrekt anslutna.
+
+- [Vecka 46 – IaC med CloudFormation](v46/README.md)
+
+Skapa Novatrix AB:s nätverk och en EC2-webbserver som Infrastructure as Code med AWS CloudFormation. Deploya två YAML-baserade stackar, verifiera resurserna och visa versionshantering genom en ändring i GitHub.

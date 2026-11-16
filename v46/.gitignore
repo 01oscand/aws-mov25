@@ -1,0 +1,7 @@
+# Inga hemligheter eller privata nycklar i GitHub
+*.pem
+*.ppk
+.env
+*.sql
+wp-config.php
+**/wp-config.php

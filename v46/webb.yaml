@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Novatrix AB v46 - EC2 med Apache fran CloudFormation (G)'
+
+Parameters:
+  KeyPairName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: novatrix-web-key
+    Description: 'Befintligt EC2 key pair i eu-north-1'
+  InstanceType:
+    Type: String
+    Default: t3.micro
+    AllowedValues:
+      - t3.micro
+      - t3.small
+    Description: 'Instanstyp - kontrollera kostnad och Free Tier i ditt konto'
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+    Description: 'SSM-public parameter for Amazon Linux 2023 x86_64'
+
+Resources:
+  NovatrixWebInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyPairName
+      SubnetId: !ImportValue novatrix-v46-PublicSubnetId
+      SecurityGroupIds:
+        - !ImportValue novatrix-v46-WebSecurityGroupId
+      MetadataOptions:
+        HttpTokens: required
+        HttpEndpoint: enabled
+      Tags:
+        - Key: Name
+          Value: novatrix-v46-web
+        - Key: LabStage
+          Value: forsta
+        - Key: Course
+          Value: MOV25-v46
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          set -euxo pipefail
+          dnf install -y httpd
+          cat > /var/www/html/index.html <<'HTML'
+          <!doctype html>
+          <html lang="sv">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width,initial-scale=1">
+            <title>Novatrix AB - v46 CloudFormation</title>
+          </head>
+          <body style="font-family:Arial,sans-serif;max-width:720px;margin:70px auto;line-height:1.6">
+            <h1>Novatrix AB - CloudFormation v46</h1>
+            <p>Denna EC2-webbserver och dess natverk har skapats med Infrastructure as Code.</p>
+            <p>Miljo: separat G-labb. Originalmiljon med WordPress fran v45 ar oforandrad.</p>
+          </body>
+          </html>
+          HTML
+          systemctl enable --now httpd
+
+Outputs:
+  InstanceId:
+    Description: 'EC2-instansens ID'
+    Value: !Ref NovatrixWebInstance
+  PublicIPv4:
+    Description: 'Publik IPv4-adress (kan andras efter stop/start)'
+    Value: !GetAtt NovatrixWebInstance.PublicIp
+  WebsiteURL:
+    Description: 'HTTP-lank till demonstrationssidan'
+    Value: !Sub 'http://${NovatrixWebInstance.PublicIp}'

@@ -1,0 +1,136 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Novatrix AB v46 - separat labbnatverk for CloudFormation (G)'
+
+Parameters:
+  AdminCidr:
+    Type: String
+    Description: 'Din dators publika IPv4-adress med /32, exempel 198.51.100.10/32'
+
+Resources:
+  NovatrixVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.46.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: novatrix-v46-vpc
+        - Key: Course
+          Value: MOV25-v46
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: novatrix-v46-igw
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref NovatrixVPC
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref NovatrixVPC
+      AvailabilityZone: !Select [0, !GetAZs '']
+      CidrBlock: 10.46.1.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: novatrix-v46-public
+
+  PrivateSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref NovatrixVPC
+      AvailabilityZone: !Select [0, !GetAZs '']
+      CidrBlock: 10.46.2.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: novatrix-v46-private-a
+
+  PrivateSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref NovatrixVPC
+      AvailabilityZone: !Select [1, !GetAZs '']
+      CidrBlock: 10.46.4.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: novatrix-v46-private-b
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref NovatrixVPC
+      Tags:
+        - Key: Name
+          Value: novatrix-v46-public-rt
+
+  PublicInternetRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetRouteAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTable
+
+  WebSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: novatrix-v46-web-sg
+      GroupDescription: 'HTTP fran internet och SSH endast fran AdminCidr'
+      VpcId: !Ref NovatrixVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+          Description: 'HTTP for demonstrationssida'
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref AdminCidr
+          Description: 'SSH endast fran egen publika IPv4'
+      Tags:
+        - Key: Name
+          Value: novatrix-v46-web-sg
+
+Outputs:
+  VpcId:
+    Description: 'ID for v46 VPC'
+    Value: !Ref NovatrixVPC
+    Export:
+      Name: novatrix-v46-VpcId
+  PublicSubnetId:
+    Description: 'ID for det publika subnetet'
+    Value: !Ref PublicSubnet
+    Export:
+      Name: novatrix-v46-PublicSubnetId
+  PrivateSubnetAId:
+    Description: 'ID for privata subnet A'
+    Value: !Ref PrivateSubnetA
+    Export:
+      Name: novatrix-v46-PrivateSubnetAId
+  PrivateSubnetBId:
+    Description: 'ID for privata subnet B'
+    Value: !Ref PrivateSubnetB
+    Export:
+      Name: novatrix-v46-PrivateSubnetBId
+  WebSecurityGroupId:
+    Description: 'ID for webbserverns Security Group'
+    Value: !Ref WebSecurityGroup
+    Export:
+      Name: novatrix-v46-WebSecurityGroupId
