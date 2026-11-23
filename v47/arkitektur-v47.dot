@@ -1,0 +1,24 @@
+digraph V47 {
+ graph [fontname="DejaVu Sans", bgcolor="#ffffff", pad="0.38", nodesep="0.32", ranksep="0.54", splines="ortho", dpi=180];
+ node [fontname="DejaVu Sans", shape=box, style="rounded,filled", fontsize=10, color="#b9cddd", penwidth=1.2, margin="0.13,0.10"];
+ edge [fontname="DejaVu Sans", fontsize=9, color="#3c6d90", arrowsize=0.7, penwidth=1.3];
+ clients [label="Besökare / Internet", fillcolor="#edf3f9"];
+ subgraph cluster_vpc {label="novatrix-vpc  |  10.0.0.0/16"; fontname="DejaVu Sans"; fontsize=13; color="#b9cddd"; style="rounded";
+   alb [label="Application Load Balancer\nnovatrix-alb\nHTTP :80", fillcolor="#d7eaf9"];
+   tg [label="Target group\nnovatrix-web-tg\nHealth /wp-login.php", fillcolor="#d7eaf9"];
+   subgraph cluster_a {label="eu-north-1a  |  novatrix-public"; fontsize=10; color="#d3dae2"; instA [label="EC2 (Auto Scaling)\nWordPress + PHP / Apache\nnovatrix-web-sg", fillcolor="#d9f1e5"];}
+   subgraph cluster_b {label="eu-north-1b  |  novatrix-public-b"; fontsize=10; color="#d3dae2"; instB [label="EC2 (Auto Scaling)\nWordPress + PHP / Apache\nnovatrix-web-sg", fillcolor="#d9f1e5"];}
+   rds [label="RDS MariaDB\nnovatrix-db\nPrivat, TCP 3306", fillcolor="#f7ebd4"];
+   efs [label="EFS Regional\nnovatrix-efs\nPrivata mount targets, TCP 2049", fillcolor="#f7ebd4"];
+ }
+ clients -> alb [label="HTTP 80"];
+ alb -> tg;
+ tg -> instA [label="hälsokontroll + trafik"];
+ tg -> instB [label="hälsokontroll + trafik"];
+ instA -> rds [label="3306", color="#679773"];
+ instB -> rds [color="#679773"];
+ instA -> efs [label="2049", color="#679773"];
+ instB -> efs [color="#679773"];
+ {rank=same; instA; instB}
+ {rank=same; rds; efs}
+}

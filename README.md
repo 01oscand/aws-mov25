@@ -26,3 +26,7 @@ Sätt upp en säker WordPress-miljö för Novatrix AB med Amazon RDS (MariaDB) f
 - [Vecka 46 – IaC med CloudFormation](v46/README.md)
 
 Skapa Novatrix AB:s nätverk och en EC2-webbserver som Infrastructure as Code med AWS CloudFormation. Deploya två YAML-baserade stackar, verifiera resurserna och visa versionshantering genom en ändring i GitHub.
+
+- [Vecka 47 – Skalbarhet och tillgänglighet](v47/README.md)
+
+Skala upp Novatrix AB:s WordPress-miljö med en Application Load Balancer och en Auto Scaling-grupp över två Availability Zones. Skapa identiska EC2-instanser från en AMI, konfigurera health checks och CPU-baserad skalning, verifiera att webbplatsen fungerar vid belastning och serverbortfall samt jämför månadskostnaden för normal och utökad kapacitet med AWS Pricing Calculator.

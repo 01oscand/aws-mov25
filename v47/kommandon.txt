@@ -1,0 +1,32 @@
+# AWS Uppgift 6 (v47) – terminalkommandon, utan hemligheter
+# Körs i CloudShell (eu-north-1) om inget annat anges.
+
+aws sts get-caller-identity
+aws configure set region eu-north-1
+
+# Hämta ALB DNS efter skapandet:
+aws elbv2 describe-load-balancers --names novatrix-alb --query 'LoadBalancers[0].DNSName' --output text
+
+# Kontrollera två friska targets (kan visa originalservern innan cutover):
+TG_ARN=$(aws elbv2 describe-target-groups --names novatrix-web-tg --query 'TargetGroups[0].TargetGroupArn' --output text)
+aws elbv2 describe-target-health --target-group-arn "$TG_ARN" --query 'TargetHealthDescriptions[].{Instance:Target.Id,State:TargetHealth.State,Reason:TargetHealth.Reason}' --output table
+
+# ASG-inställningar:
+aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names novatrix-web-asg --query 'AutoScalingGroups[0].{Min:MinSize,Desired:DesiredCapacity,Max:MaxSize,Instances:Instances[].InstanceId}' --output json
+
+# ASG-aktivitet / bevis för skalning och failover:
+aws autoscaling describe-scaling-activities --auto-scaling-group-name novatrix-web-asg --max-items 10 --query 'Activities[].{Status:StatusCode,Description:Description,Start:StartTime}' --output table
+
+# WordPress kontroll (körs på befintliga novatrix-web via SSH)
+# Ange faktiskt RDS-endpoint i en tillfällig miljövariabel i terminalen:
+RDS_ENDPOINT='DIN-FAKTISKA-RDS-ENDPOINT'
+# Visa nuvarande WordPress-URL:er (databaslösenord frågas interaktivt):
+mysql -h "$RDS_ENDPOINT" -u admin -p -D wordpress -e "SELECT option_name,option_value FROM wp_options WHERE option_name IN ('siteurl','home');"
+# Byt till faktisk ALB DNS när ALB är Active, efter att databasbackup verifierats:
+# ALB_DNS='DIN-FAKTISKA-ALB-DNS'
+# mysql -h "$RDS_ENDPOINT" -u admin -p -D wordpress -e "UPDATE wp_options SET option_value='http://${ALB_DNS}' WHERE option_name IN ('siteurl','home');"
+
+# Git från Windows PowerShell (utförs lokalt i C:\MOV25\AWS\aws-mov25)
+# git add README.md v47
+# git commit -m "v47: ALB och Auto Scaling dokumentation"
+# git push
