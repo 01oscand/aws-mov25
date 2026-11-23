@@ -17,7 +17,7 @@ Den befintliga WordPress-miljön för Novatrix AB byggs ut med en Application Lo
 ![Arkitekturskiss](arkitektur-v47.png)
 
 ## Praktiskt genomförande
-Se `AWS_v47_Steg_for_steg_guide.pdf` som tillhör inlämningen. Konfigurationen utförs i AWS Management Console för G, medan `lasttest.sh` och `kommandon.txt` innehåller reproducerbara verifieringskommandon. Den befintliga WordPress-servern behålls tills två ASG-instanser är healthy och failover har verifierats.
+Konfigurationen utförs i AWS Management Console för G, medan `lasttest.sh` och `kommandon.txt` innehåller reproducerbara verifieringskommandon. Den befintliga WordPress-servern behålls tills två ASG-instanser är healthy och failover har verifierats.
 
 ## Verifiering
 - Två friska targets i olika AZ, WordPress fungerar via ALB DNS.
